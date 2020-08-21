@@ -20,14 +20,14 @@ app.get('/card', (req,res) => {
         .then(cardInfo => {
             anki.returnRenderElements(cardInfo)
                 .then(cardObject => {
-                    console.log(cardObject);
                     res.render("card", {
                         card: JSON.stringify(cardObject)
-                    })
-                })
+                    });
+                });
         })
         .catch(error => console.error(error))
 });
+
 
 app.get('', (req,res) => {
     res.send("this is the main page");

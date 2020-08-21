@@ -3,13 +3,24 @@
 <head>
     <title>Anki Card</title>
 </head>
-<script>
- const card = {{{ card }}}
-</script>
+
 <body>
     <div id="question"></div>
     <div id="answer"></div>
     <div id="nextReviews"></div> 
 </body>
-<!-- <script  type="text/javascript"  src="/js/manipulateCardObject.js"></script>  -->
+<!-- <script  type="text/javascript"  src="/js/manipulateCardObject.js"></script>-->
+<script>
 
+ const card = {{{ card }}}
+     const questionElement = document.getElementById("question");
+ const answerElement = document.getElementById("answer");
+ const nextReviewsElement = document.getElementById("nextReviews");
+
+ questionElement.innerHTML = card.question;
+ answerElement.innerHTML = card.answer;
+ nextReviewsElement.innerHTML = card.nextReviews;
+
+
+
+</script>
