@@ -24,7 +24,7 @@ const getCurrentCardInfo = async () => {
 const returnRenderElements = async (cardInfo) => {
     //TODO: Substitute it in place, do it per array (first element gets first image from getImages()))
     const cardImage = await getImages(cardInfo);
-
+    
     return {
         question: cardInfo.question,
         answer: cardInfo.answer,
@@ -53,36 +53,30 @@ const startReview = async() => {
 
 
 const getImages = async (cardInfo) => {
-    //TODO: Refactor function to return array of image data
     const domAnswer = new jsdom.JSDOM(cardInfo.answer);
 
     const domImages = Object.values(domAnswer.window.document.getElementsByTagName('img'));
     //TODO: What about what isnt img?
-    //BUG: Why are the first two objects in the array empty? 
+
     try{
 
-        let imageArray;
-
-        await Promise.all(
-
-            imageArray = domImages.map(async item  =>  {
+        let imageArray = [];
+        for(let i = 0; i < domImages.length;++i){
 
             const options = {
                 method: 'POST',
                 body: JSON.stringify({
                     action: 'retrieveMediaFile',
                     params: {
-                        filename: item.getAttribute('src')} 
+                        filename: domImages[i].getAttribute('src')} 
                 })
             };
-
 
             const fetchedResponse = await fetch(ANKICONNECT,options);
             const fetchedJSON = await fetchedResponse.json();
             imageArray.push(fetchedJSON);
+        }
 
-            })
-        );
         return imageArray;
 
     } catch(error){console.error(error);}
