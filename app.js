@@ -27,10 +27,11 @@ const returnRenderElements = async (cardInfo) => {
     
     return {
         question: cardInfo.question,
+        questionImages: cardImage[0], //base64 encoded; <img src="data:image/<filetype>;base64,<cardImage>">
         answer: cardInfo.answer,
+        answerImages: cardImage[1],   //base64 encoded; <img src="data:image/<filetype>;base64,<cardImage>">
         nextReviews:cardInfo.nextReviews, //Array
-        css: cardInfo.css,
-        image: cardImage //base64 encoded; <img src="data:image/<filetype>;base64,<cardImage>">
+        css: cardInfo.css
     };
 }
 
@@ -52,35 +53,46 @@ const startReview = async() => {
 }
 
 
-const getImages = async (cardInfo) => {
+const getImages = async cardInfo => {
+    // Input: cardInfo object
+    // Output: 2-slot array, 1st with array of images in question section, 2nd with array of images in output section (base64 encoded)
+
+    const domQuestion = new jsdom.JSDOM(cardInfo.question);
     const domAnswer = new jsdom.JSDOM(cardInfo.answer);
 
-    const domImages = Object.values(domAnswer.window.document.getElementsByTagName('img'));
-    //TODO: What about what isnt img?
+    const domQuestionImages = Object.values(domQuestion.window.document.getElementsByTagName('img'));
+    const domAnswerImages = Object.values(domAnswer.window.document.getElementsByTagName('img'));
+    
+    const imagesArray = [];
 
-    try{
+    async function getSectionImages(domSectionImages){
+        //TODO: What about what isnt img?
+        try{
 
-        let imageArray = [];
-        for(let i = 0; i < domImages.length;++i){
+            let imageArray = [];
+            for(let i = 0; i < domSectionImages.length;++i){
 
-            const options = {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'retrieveMediaFile',
-                    params: {
-                        filename: domImages[i].getAttribute('src')} 
-                })
-            };
+                const options = {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'retrieveMediaFile',
+                        params: {
+                            filename: domSectionImages[i].getAttribute('src')} 
+                    })
+                };
 
-            const fetchedResponse = await fetch(ANKICONNECT,options);
-            const fetchedJSON = await fetchedResponse.json();
-            imageArray.push(fetchedJSON);
-        }
+                const fetchedResponse = await fetch(ANKICONNECT,options);
+                const fetchedJSON = await fetchedResponse.json();
+                imageArray.push(fetchedJSON);
+            }
 
-        return imageArray;
-
-    } catch(error){console.error(error);}
+            return imageArray;
+        } catch(error){console.error(error);}
     }
+    imagesArray.push(await getSectionImages(domQuestionImages));
+    imagesArray.push(await getSectionImages(domAnswerImages));
+    return imagesArray;
+}
 
 
 module.exports = {

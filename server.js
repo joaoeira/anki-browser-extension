@@ -20,7 +20,7 @@ app.get('/card', (req,res) => {
         .then(cardInfo => {
             anki.returnRenderElements(cardInfo)
                 .then(cardObject => {
-                    console.log(cardObject.image);
+                    console.log(cardObject.questionImages)
                     res.render("card", {
                         card: JSON.stringify(cardObject)
                     });
